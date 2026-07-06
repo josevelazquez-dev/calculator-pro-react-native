@@ -1,46 +1,80 @@
-import { Platform } from 'react-native';
+import { Platform, PixelRatio } from 'react-native';
 
 const fontFamily = Platform.select({
-  ios: 'SF Pro',
-  android: 'Roboto',
+  ios: undefined,
+  android: 'System',
   default: 'System',
 });
 
+const scale = PixelRatio.getFontScale();
+
 export const typography = {
-  display: {
-    fontSize: 48,
-    fontWeight: '300' as const,
+  largeTitle: {
+    fontSize: 64 / scale,
+    fontWeight: '200' as const,
     fontFamily,
-    lineHeight: 56,
+    lineHeight: 72 / scale,
+    letterSpacing: -1.5,
+  },
+  display: {
+    fontSize: 48 / scale,
+    fontWeight: '200' as const,
+    fontFamily,
+    lineHeight: 56 / scale,
+    letterSpacing: -0.5,
   },
   displaySmall: {
-    fontSize: 32,
+    fontSize: 32 / scale,
     fontWeight: '300' as const,
     fontFamily,
-    lineHeight: 40,
+    lineHeight: 38 / scale,
+  },
+  title: {
+    fontSize: 22 / scale,
+    fontWeight: '500' as const,
+    fontFamily,
+    lineHeight: 28 / scale,
+  },
+  buttonLarge: {
+    fontSize: 28 / scale,
+    fontWeight: '400' as const,
+    fontFamily,
+    lineHeight: 34 / scale,
+    letterSpacing: 0.25,
   },
   button: {
-    fontSize: 24,
-    fontWeight: '500' as const,
+    fontSize: 22 / scale,
+    fontWeight: '400' as const,
     fontFamily,
-    lineHeight: 32,
+    lineHeight: 28 / scale,
+    letterSpacing: 0.25,
   },
   buttonSmall: {
-    fontSize: 18,
+    fontSize: 16 / scale,
     fontWeight: '500' as const,
     fontFamily,
-    lineHeight: 24,
+    lineHeight: 20 / scale,
+    letterSpacing: 0.1,
   },
   body: {
-    fontSize: 16,
+    fontSize: 16 / scale,
     fontWeight: '400' as const,
     fontFamily,
-    lineHeight: 22,
+    lineHeight: 22 / scale,
   },
   caption: {
-    fontSize: 12,
+    fontSize: 12 / scale,
     fontWeight: '400' as const,
     fontFamily,
-    lineHeight: 16,
+    lineHeight: 16 / scale,
+    letterSpacing: 0.15,
+  },
+  overline: {
+    fontSize: 10 / scale,
+    fontWeight: '600' as const,
+    fontFamily,
+    lineHeight: 12 / scale,
+    letterSpacing: 1.5,
+    textTransform: 'uppercase' as const,
   },
 } as const;

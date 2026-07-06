@@ -1,3 +1,5 @@
+export { ScientificFunction } from './ScientificFunction';
+
 export enum Operator {
   Add = '+',
   Subtract = '−',
@@ -5,6 +7,8 @@ export enum Operator {
   Divide = '÷',
   Percent = '%',
   Equals = '=',
+  Power = 'xʸ',
+  Mod = 'mod',
 }
 
 export interface CalculationEntry {
@@ -14,6 +18,11 @@ export interface CalculationEntry {
   timestamp: number;
 }
 
+export type CalculatorMode = 'basic' | 'scientific';
+
+/**
+ * Represents the complete state of the calculator.
+ */
 export type CalculatorState = {
   displayValue: string;
   previousValue: number | null;
@@ -21,4 +30,7 @@ export type CalculatorState = {
   waitingForOperand: boolean;
   memory: number;
   expression: string;
+  error: string | null;
+  mode: CalculatorMode;
+  openParenCount: number;
 };

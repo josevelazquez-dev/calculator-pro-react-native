@@ -1,38 +1,102 @@
+import { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSequence,
+  FadeInDown,
+} from 'react-native-reanimated';
 import { useTheme } from '@/presentation/providers';
-import { typography, spacing } from '@/core/theme';
+import { useResponsive } from '@/core/hooks';
+import { spacing } from '@/core/theme';
 
 interface DisplayRowProps {
   expression: string;
   value: string;
+  isError?: boolean;
 }
 
-export function DisplayRow({ expression, value }: DisplayRowProps) {
+export function DisplayRow({ expression, value, isError }: DisplayRowProps) {
   const { colors } = useTheme();
+  const { isDesktop, isTablet } = useResponsive();
+  const isWide = isDesktop || isTablet;
+
+  const displayScale = useSharedValue(1);
+
+  useEffect(() => {
+    displayScale.value = withSequence(
+      withTiming(1.04, { duration: 60 }),
+      withTiming(1, { duration: 120 }),
+    );
+  }, [value, displayScale]);
+
+  const animatedValueStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: displayScale.value }],
+  }));
+
+  const valueFontSize = isWide ? (isDesktop ? 80 : 72) : 64;
+  const expressionFontSize = isWide ? 26 : 22;
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.expression, { color: colors.textSecondary }]} numberOfLines={1}>
-        {expression}
-      </Text>
-      <Text style={[styles.value, { color: colors.text }]} numberOfLines={1} adjustsFontSizeToFit>
-        {value}
-      </Text>
+      {expression ? (
+        <Animated.View entering={FadeInDown.duration(200).springify()}>
+          <Text
+            style={[
+              styles.expression,
+              { color: colors.textTertiary, fontSize: expressionFontSize },
+            ]}
+            numberOfLines={1}
+          >
+            {expression}
+          </Text>
+        </Animated.View>
+      ) : (
+        <View style={styles.expressionPlaceholder} />
+      )}
+      <Animated.View style={[styles.valueRow, animatedValueStyle]}>
+        <Text
+          style={[
+            styles.value,
+            { color: isError ? colors.error : colors.text, fontSize: isError ? 36 : valueFontSize },
+          ]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.5}
+        >
+          {value}
+        </Text>
+      </Animated.View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xxxl,
+    paddingVertical: spacing.lg,
     alignItems: 'flex-end',
   },
   expression: {
-    ...typography.body,
-    minHeight: 22,
+    fontWeight: '400',
+    marginBottom: spacing.xs,
+    opacity: 0.7,
+    lineHeight: 30,
+  },
+  expressionPlaceholder: {
+    height: 30,
+    marginBottom: spacing.xs,
+  },
+  valueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   value: {
-    ...typography.display,
+    fontWeight: '200',
+    textAlign: 'right',
+    flexShrink: 1,
+    lineHeight: 80,
+    letterSpacing: -1.5,
   },
 });
