@@ -1,10 +1,10 @@
 {
   "version": 2,
   "public": true,
-  "buildCommand": "npx expo export --platform web --output-dir dist",
+  "buildCommand": "npx expo export --platform web",
   "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/((?!_expo/|assets/|icons/|screenshots/|sw.js|offline.html|manifest.json|favicon.ico|apple-touch-icon).*)", "destination": "/index.html" }
+    { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
     {
