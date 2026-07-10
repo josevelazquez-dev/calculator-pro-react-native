@@ -1,5 +1,5 @@
 import { lazy, Suspense, memo, useMemo, useCallback } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text, Platform } from 'react-native';
 import { CalculatorDisplay } from '@/presentation/organisms';
 import { Keypad } from '@/presentation/organisms';
 import { useTheme, useCalculator } from '@/presentation/providers';
@@ -102,9 +102,10 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.xxl,
     borderWidth: 1,
     overflow: 'hidden',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
+    ...Platform.select({
+      web: { boxShadow: '0px 4px 16px rgba(0,0,0,0.1)' },
+      default: { shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 16 },
+    }),
     elevation: 4,
   },
   displayArea: {

@@ -1,5 +1,5 @@
 import { useMemo, memo, type ComponentProps } from 'react';
-import { Text, StyleSheet, type TextStyle } from 'react-native';
+import { Text, StyleSheet, Platform, type TextStyle } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -91,11 +91,15 @@ const Button = memo(function Button({
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: disabled ? 1 : scale.value * (hoveredSV.value ? 1.04 : 1) }],
-    shadowOpacity: disabled
-      ? 0
-      : variant === 'operator'
-        ? 0.2 + elevated.value * 0.15
-        : 0.1 + elevated.value * 0.08,
+    ...(isWeb
+      ? {}
+      : {
+          shadowOpacity: disabled
+            ? 0
+            : variant === 'operator'
+              ? 0.2 + elevated.value * 0.15
+              : 0.1 + elevated.value * 0.08,
+        }),
   }));
 
   const webHoverProps = isWeb
@@ -163,15 +167,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     margin: spacing.xs,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
+    ...Platform.select({
+      web: { boxShadow: '0px 2px 6px rgba(0,0,0,0.1)' },
+      default: { shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 6 },
+    }),
     elevation: 2,
     borderWidth: 1,
   },
   operatorShadow: {
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 12,
+    ...Platform.select({
+      web: { boxShadow: '0px 4px 12px rgba(0,0,0,0.15)' },
+      default: { shadowOffset: { width: 0, height: 4 }, shadowRadius: 12 },
+    }),
     elevation: 6,
   },
   double: {

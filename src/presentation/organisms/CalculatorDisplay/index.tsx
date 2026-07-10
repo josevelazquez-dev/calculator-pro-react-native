@@ -1,5 +1,5 @@
 import { memo, useMemo } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Platform } from 'react-native';
 import { DisplayRow } from '@/presentation/molecules';
 import { useCalculator, useTheme } from '@/presentation/providers';
 import { useResponsive } from '@/core/hooks';
@@ -43,9 +43,10 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.xl,
     borderWidth: 1,
     paddingVertical: spacing.md,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
+    ...Platform.select({
+      web: { boxShadow: '0px 2px 8px rgba(0,0,0,0.06)' },
+      default: { shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8 },
+    }),
     elevation: 1,
   },
 });
