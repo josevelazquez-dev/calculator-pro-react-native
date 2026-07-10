@@ -25,6 +25,6 @@ export default [
     },
   },
   {
-    ignores: ['node_modules/', '.expo/', 'dist/', 'web-build/', 'babel.config.js', 'public/'],
+    ignores: ['node_modules/', '.expo/', 'dist/', 'web-build/', 'babel.config.js', 'public/', 'jest.config.js'],
   },
 ];
