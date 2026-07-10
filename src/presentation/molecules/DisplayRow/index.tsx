@@ -1,10 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, memo, useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
   withSequence,
+  cancelAnimation,
   FadeInDown,
 } from 'react-native-reanimated';
 import { useTheme } from '@/presentation/providers';
@@ -17,7 +18,7 @@ interface DisplayRowProps {
   isError?: boolean;
 }
 
-export function DisplayRow({ expression, value, isError }: DisplayRowProps) {
+const DisplayRow = memo(function DisplayRow({ expression, value, isError }: DisplayRowProps) {
   const { colors } = useTheme();
   const { isDesktop, isTablet } = useResponsive();
   const isWide = isDesktop || isTablet;
@@ -25,6 +26,7 @@ export function DisplayRow({ expression, value, isError }: DisplayRowProps) {
   const displayScale = useSharedValue(1);
 
   useEffect(() => {
+    cancelAnimation(displayScale);
     displayScale.value = withSequence(
       withTiming(1.04, { duration: 60 }),
       withTiming(1, { duration: 120 }),
@@ -35,8 +37,13 @@ export function DisplayRow({ expression, value, isError }: DisplayRowProps) {
     transform: [{ scale: displayScale.value }],
   }));
 
-  const valueFontSize = isWide ? (isDesktop ? 80 : 72) : 64;
-  const expressionFontSize = isWide ? 26 : 22;
+  const fontSize = useMemo(
+    () => ({
+      value: isWide ? (isDesktop ? 80 : 72) : 64,
+      expression: isWide ? 26 : 22,
+    }),
+    [isWide, isDesktop],
+  );
 
   return (
     <View style={styles.container}>
@@ -45,7 +52,7 @@ export function DisplayRow({ expression, value, isError }: DisplayRowProps) {
           <Text
             style={[
               styles.expression,
-              { color: colors.textTertiary, fontSize: expressionFontSize },
+              { color: colors.textTertiary, fontSize: fontSize.expression },
             ]}
             numberOfLines={1}
           >
@@ -59,7 +66,10 @@ export function DisplayRow({ expression, value, isError }: DisplayRowProps) {
         <Text
           style={[
             styles.value,
-            { color: isError ? colors.error : colors.text, fontSize: isError ? 36 : valueFontSize },
+            {
+              color: isError ? colors.error : colors.text,
+              fontSize: isError ? 36 : fontSize.value,
+            },
           ]}
           numberOfLines={1}
           adjustsFontSizeToFit
@@ -70,7 +80,9 @@ export function DisplayRow({ expression, value, isError }: DisplayRowProps) {
       </Animated.View>
     </View>
   );
-}
+});
+
+export { DisplayRow };
 
 const styles = StyleSheet.create({
   container: {

@@ -1,21 +1,81 @@
+import { useCallback, memo } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { CalculatorButton } from '@/presentation/molecules';
 import { useCalculator } from '@/presentation/providers';
-import { Operator } from '@/domain/entities';
+import { Operator, ScientificFunction } from '@/domain/entities';
 import { useResponsive } from '@/core/hooks';
 import { spacing } from '@/core/theme';
 
-export function ScientificKeypad() {
+const ScientificKeypad = memo(function ScientificKeypad() {
   const { dispatch } = useCalculator();
   const { isDesktop, isTablet } = useResponsive();
   const isWide = isDesktop || isTablet;
 
-  const fn = (name: string) => dispatch({ type: 'SCIENTIFIC_FUNCTION', fn: name });
-  const paren = (p: '(' | ')') => dispatch({ type: 'INPUT_PAREN', paren: p });
-  const constant = (c: 'π' | 'e') => dispatch({ type: 'INPUT_CONSTANT', constant: c });
-  const random = () => dispatch({ type: 'INPUT_RANDOM' });
-  const op = (o: Operator) => dispatch({ type: 'SET_OPERATOR', operator: o });
-  const digit = (d: string) => dispatch({ type: 'INPUT_DIGIT', digit: d });
+  const fn = useCallback(
+    (name: ScientificFunction) => dispatch({ type: 'SCIENTIFIC_FUNCTION', fn: name }),
+    [dispatch],
+  );
+  const paren = useCallback(
+    (p: '(' | ')') => dispatch({ type: 'INPUT_PAREN', paren: p }),
+    [dispatch],
+  );
+  const constant = useCallback(
+    (c: 'π' | 'e') => dispatch({ type: 'INPUT_CONSTANT', constant: c }),
+    [dispatch],
+  );
+  const random = useCallback(() => dispatch({ type: 'INPUT_RANDOM' }), [dispatch]);
+  const op = useCallback(
+    (o: Operator) => dispatch({ type: 'SET_OPERATOR', operator: o }),
+    [dispatch],
+  );
+  const digit = useCallback((d: string) => dispatch({ type: 'INPUT_DIGIT', digit: d }), [dispatch]);
+
+  const onSin = useCallback(() => fn(ScientificFunction.Sin), [fn]);
+  const onCos = useCallback(() => fn(ScientificFunction.Cos), [fn]);
+  const onTan = useCallback(() => fn(ScientificFunction.Tan), [fn]);
+  const onAsin = useCallback(() => fn(ScientificFunction.Asin), [fn]);
+  const onAcos = useCallback(() => fn(ScientificFunction.Acos), [fn]);
+  const onAtan = useCallback(() => fn(ScientificFunction.Atan), [fn]);
+  const onX2 = useCallback(() => fn(ScientificFunction.Square), [fn]);
+  const onX3 = useCallback(() => fn(ScientificFunction.Cube), [fn]);
+  const onSqrt = useCallback(() => fn(ScientificFunction.Sqrt), [fn]);
+  const on10x = useCallback(() => fn(ScientificFunction.TenPower), [fn]);
+  const onEx = useCallback(() => fn(ScientificFunction.Exp), [fn]);
+  const onLn = useCallback(() => fn(ScientificFunction.Ln), [fn]);
+  const onLog = useCallback(() => fn(ScientificFunction.Log), [fn]);
+  const onExp = useCallback(() => fn(ScientificFunction.InvExp), [fn]);
+  const onFact = useCallback(() => fn(ScientificFunction.Factorial), [fn]);
+  const onAbs = useCallback(() => fn(ScientificFunction.Abs), [fn]);
+  const onPi = useCallback(() => constant('π'), [constant]);
+  const onE = useCallback(() => constant('e'), [constant]);
+  const onLParen = useCallback(() => paren('('), [paren]);
+  const onRParen = useCallback(() => paren(')'), [paren]);
+  const onPower = useCallback(() => op(Operator.Power), [op]);
+  const onMod = useCallback(() => op(Operator.Mod), [op]);
+  const onDivide = useCallback(() => op(Operator.Divide), [op]);
+  const onMultiply = useCallback(() => op(Operator.Multiply), [op]);
+  const onSubtract = useCallback(() => op(Operator.Subtract), [op]);
+  const onAdd = useCallback(() => op(Operator.Add), [op]);
+  const onMC = useCallback(() => dispatch({ type: 'MEMORY_CLEAR' }), [dispatch]);
+  const onMR = useCallback(() => dispatch({ type: 'MEMORY_RECALL' }), [dispatch]);
+  const onMPlus = useCallback(() => dispatch({ type: 'MEMORY_ADD' }), [dispatch]);
+  const onMMinus = useCallback(() => dispatch({ type: 'MEMORY_SUBTRACT' }), [dispatch]);
+  const onClear = useCallback(() => dispatch({ type: 'CLEAR' }), [dispatch]);
+  const onClearEntry = useCallback(() => dispatch({ type: 'CLEAR_ENTRY' }), [dispatch]);
+  const onPercent = useCallback(() => dispatch({ type: 'PERCENTAGE' }), [dispatch]);
+  const onCalc = useCallback(() => dispatch({ type: 'CALCULATE' }), [dispatch]);
+  const onToggleSign = useCallback(() => dispatch({ type: 'TOGGLE_SIGN' }), [dispatch]);
+  const onDecimal = useCallback(() => dispatch({ type: 'INPUT_DECIMAL' }), [dispatch]);
+  const on7 = useCallback(() => digit('7'), [digit]);
+  const on8 = useCallback(() => digit('8'), [digit]);
+  const on9 = useCallback(() => digit('9'), [digit]);
+  const on4 = useCallback(() => digit('4'), [digit]);
+  const on5 = useCallback(() => digit('5'), [digit]);
+  const on6 = useCallback(() => digit('6'), [digit]);
+  const on1 = useCallback(() => digit('1'), [digit]);
+  const on2 = useCallback(() => digit('2'), [digit]);
+  const on3 = useCallback(() => digit('3'), [digit]);
+  const on0 = useCallback(() => digit('0'), [digit]);
 
   return (
     <ScrollView
@@ -24,155 +84,80 @@ export function ScientificKeypad() {
       showsVerticalScrollIndicator={false}
       bounces={false}
     >
-      {/* Row 1 — Trig */}
       <View style={styles.row}>
-        <CalculatorButton label="sin" variant="function" onPress={() => fn('sin')} />
-        <CalculatorButton label="cos" variant="function" onPress={() => fn('cos')} />
-        <CalculatorButton label="tan" variant="function" onPress={() => fn('tan')} />
+        <CalculatorButton label="sin" variant="function" onPress={onSin} />
+        <CalculatorButton label="cos" variant="function" onPress={onCos} />
+        <CalculatorButton label="tan" variant="function" onPress={onTan} />
         <CalculatorButton label="Rand" variant="utility" onPress={random} />
       </View>
-
-      {/* Row 2 — Inverse trig */}
       <View style={styles.row}>
-        <CalculatorButton label="asin" variant="function" onPress={() => fn('asin')} />
-        <CalculatorButton label="acos" variant="function" onPress={() => fn('acos')} />
-        <CalculatorButton label="atan" variant="function" onPress={() => fn('atan')} />
-        <CalculatorButton label="exp" variant="utility" onPress={() => fn('exp')} />
+        <CalculatorButton label="asin" variant="function" onPress={onAsin} />
+        <CalculatorButton label="acos" variant="function" onPress={onAcos} />
+        <CalculatorButton label="atan" variant="function" onPress={onAtan} />
+        <CalculatorButton label="exp" variant="utility" onPress={onExp} />
       </View>
-
-      {/* Row 3 — Powers */}
       <View style={styles.row}>
-        <CalculatorButton label="x²" variant="function" onPress={() => fn('x²')} />
-        <CalculatorButton label="x³" variant="function" onPress={() => fn('x³')} />
-        <CalculatorButton label="xʸ" variant="operator" onPress={() => op(Operator.Power)} />
-        <CalculatorButton label="√" variant="function" onPress={() => fn('sqrt')} />
+        <CalculatorButton label="x²" variant="function" onPress={onX2} />
+        <CalculatorButton label="x³" variant="function" onPress={onX3} />
+        <CalculatorButton label="xʸ" variant="operator" onPress={onPower} />
+        <CalculatorButton label="√" variant="function" onPress={onSqrt} />
       </View>
-
-      {/* Row 4 — Logs */}
       <View style={styles.row}>
-        <CalculatorButton label="10ˣ" variant="function" onPress={() => fn('10ˣ')} />
-        <CalculatorButton label="eˣ" variant="function" onPress={() => fn('eˣ')} />
-        <CalculatorButton label="ln" variant="function" onPress={() => fn('ln')} />
-        <CalculatorButton label="log" variant="function" onPress={() => fn('log')} />
+        <CalculatorButton label="10ˣ" variant="function" onPress={on10x} />
+        <CalculatorButton label="eˣ" variant="function" onPress={onEx} />
+        <CalculatorButton label="ln" variant="function" onPress={onLn} />
+        <CalculatorButton label="log" variant="function" onPress={onLog} />
       </View>
-
-      {/* Row 5 — Constants & misc */}
       <View style={styles.row}>
-        <CalculatorButton label="π" variant="utility" onPress={() => constant('π')} />
-        <CalculatorButton label="e" variant="utility" onPress={() => constant('e')} />
-        <CalculatorButton label="n!" variant="function" onPress={() => fn('n!')} />
-        <CalculatorButton label="mod" variant="operator" onPress={() => op(Operator.Mod)} />
+        <CalculatorButton label="π" variant="utility" onPress={onPi} />
+        <CalculatorButton label="e" variant="utility" onPress={onE} />
+        <CalculatorButton label="n!" variant="function" onPress={onFact} />
+        <CalculatorButton label="mod" variant="operator" onPress={onMod} />
       </View>
-
-      {/* Row 6 — Parens, abs */}
       <View style={styles.row}>
-        <CalculatorButton label="(" variant="utility" onPress={() => paren('(')} />
-        <CalculatorButton label=")" variant="utility" onPress={() => paren(')')} />
-        <CalculatorButton label="|x|" variant="function" onPress={() => fn('abs')} />
-        <CalculatorButton
-          label="MC"
-          variant="utility"
-          onPress={() => dispatch({ type: 'MEMORY_CLEAR' })}
-        />
+        <CalculatorButton label="(" variant="utility" onPress={onLParen} />
+        <CalculatorButton label=")" variant="utility" onPress={onRParen} />
+        <CalculatorButton label="|x|" variant="function" onPress={onAbs} />
+        <CalculatorButton label="MC" variant="utility" onPress={onMC} />
       </View>
-
-      {/* Row 7 — Memory + ÷ */}
       <View style={styles.row}>
-        <CalculatorButton
-          label="MR"
-          variant="utility"
-          onPress={() => dispatch({ type: 'MEMORY_RECALL' })}
-        />
-        <CalculatorButton
-          label="M+"
-          variant="utility"
-          onPress={() => dispatch({ type: 'MEMORY_ADD' })}
-        />
-        <CalculatorButton
-          label="M-"
-          variant="utility"
-          onPress={() => dispatch({ type: 'MEMORY_SUBTRACT' })}
-        />
-        <CalculatorButton
-          label={Operator.Divide}
-          variant="operator"
-          onPress={() => op(Operator.Divide)}
-        />
+        <CalculatorButton label="MR" variant="utility" onPress={onMR} />
+        <CalculatorButton label="M+" variant="utility" onPress={onMPlus} />
+        <CalculatorButton label="M-" variant="utility" onPress={onMMinus} />
+        <CalculatorButton label={Operator.Divide} variant="operator" onPress={onDivide} />
       </View>
-
-      {/* Row 8 — 7 8 9 × */}
       <View style={styles.row}>
-        <CalculatorButton label="7" onPress={() => digit('7')} />
-        <CalculatorButton label="8" onPress={() => digit('8')} />
-        <CalculatorButton label="9" onPress={() => digit('9')} />
-        <CalculatorButton
-          label={Operator.Multiply}
-          variant="operator"
-          onPress={() => op(Operator.Multiply)}
-        />
+        <CalculatorButton label="7" onPress={on7} />
+        <CalculatorButton label="8" onPress={on8} />
+        <CalculatorButton label="9" onPress={on9} />
+        <CalculatorButton label={Operator.Multiply} variant="operator" onPress={onMultiply} />
       </View>
-
-      {/* Row 9 — 4 5 6 – */}
       <View style={styles.row}>
-        <CalculatorButton label="4" onPress={() => digit('4')} />
-        <CalculatorButton label="5" onPress={() => digit('5')} />
-        <CalculatorButton label="6" onPress={() => digit('6')} />
-        <CalculatorButton
-          label={Operator.Subtract}
-          variant="operator"
-          onPress={() => op(Operator.Subtract)}
-        />
+        <CalculatorButton label="4" onPress={on4} />
+        <CalculatorButton label="5" onPress={on5} />
+        <CalculatorButton label="6" onPress={on6} />
+        <CalculatorButton label={Operator.Subtract} variant="operator" onPress={onSubtract} />
       </View>
-
-      {/* Row 10 — 1 2 3 + */}
       <View style={styles.row}>
-        <CalculatorButton label="1" onPress={() => digit('1')} />
-        <CalculatorButton label="2" onPress={() => digit('2')} />
-        <CalculatorButton label="3" onPress={() => digit('3')} />
-        <CalculatorButton
-          label={Operator.Add}
-          variant="operator"
-          onPress={() => op(Operator.Add)}
-        />
+        <CalculatorButton label="1" onPress={on1} />
+        <CalculatorButton label="2" onPress={on2} />
+        <CalculatorButton label="3" onPress={on3} />
+        <CalculatorButton label={Operator.Add} variant="operator" onPress={onAdd} />
       </View>
-
-      {/* Row 11 — C CE % = */}
       <View style={styles.row}>
-        <CalculatorButton
-          label="C"
-          variant="function"
-          onPress={() => dispatch({ type: 'CLEAR' })}
-        />
-        <CalculatorButton
-          label="CE"
-          variant="function"
-          onPress={() => dispatch({ type: 'CLEAR_ENTRY' })}
-        />
-        <CalculatorButton
-          label="%"
-          variant="function"
-          onPress={() => dispatch({ type: 'PERCENTAGE' })}
-        />
-        <CalculatorButton
-          label="="
-          variant="operator"
-          onPress={() => dispatch({ type: 'CALCULATE' })}
-        />
+        <CalculatorButton label="C" variant="function" onPress={onClear} />
+        <CalculatorButton label="CE" variant="function" onPress={onClearEntry} />
+        <CalculatorButton label="%" variant="function" onPress={onPercent} />
+        <CalculatorButton label="=" variant="operator" onPress={onCalc} />
       </View>
-
-      {/* Row 12 — ± 0 . */}
       <View style={styles.row}>
-        <CalculatorButton
-          label="±"
-          variant="utility"
-          onPress={() => dispatch({ type: 'TOGGLE_SIGN' })}
-        />
-        <CalculatorButton label="0" size="double" onPress={() => digit('0')} />
-        <CalculatorButton label="." onPress={() => dispatch({ type: 'INPUT_DECIMAL' })} />
+        <CalculatorButton label="±" variant="utility" onPress={onToggleSign} />
+        <CalculatorButton label="0" size="double" onPress={on0} />
+        <CalculatorButton label="." onPress={onDecimal} />
       </View>
     </ScrollView>
   );
-}
+});
 
 const styles = StyleSheet.create({
   scroll: {
@@ -191,3 +176,5 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
 });
+
+export { ScientificKeypad };

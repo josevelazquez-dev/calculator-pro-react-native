@@ -29,7 +29,17 @@
     },
     "web": {
       "favicon": "./assets/favicon.png",
-      "bundler": "metro"
+      "bundler": "metro",
+      "meta": {
+        "viewport": "width=device-width, initial-scale=1, viewport-fit=cover",
+        "apple-mobile-web-app-capable": "yes",
+        "apple-mobile-web-app-status-bar-style": "black-translucent",
+        "apple-mobile-web-app-title": "Calc Pro",
+        "mobile-web-app-capable": "yes",
+        "application-name": "Calculator Pro",
+        "msapplication-TileColor": "#0A0A0F",
+        "msapplication-TileImage": "/icons/icon-144x144.png"
+      }
     },
     "plugins": [
       "expo-router"

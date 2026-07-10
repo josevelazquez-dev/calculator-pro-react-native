@@ -1,26 +1,55 @@
+import { lazy, Suspense, memo, useMemo, useCallback } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { CalculatorDisplay } from '@/presentation/organisms';
-import { ScientificKeypad } from '@/presentation/organisms';
 import { Keypad } from '@/presentation/organisms';
 import { useTheme, useCalculator } from '@/presentation/providers';
 import { useResponsive } from '@/core/hooks';
 import { borderRadius, spacing } from '@/core/theme';
 
-export function CalculatorLayout() {
+const ScientificKeypad = lazy(() =>
+  import('@/presentation/organisms/ScientificKeypad').then((m) => ({
+    default: m.ScientificKeypad,
+  })),
+);
+
+const CalculatorLayout = memo(function CalculatorLayout() {
   const { colors } = useTheme();
   const { state, dispatch } = useCalculator();
   const { isDesktop, isTablet, calculatorMaxWidth } = useResponsive();
   const isWide = isDesktop || isTablet;
   const isScientific = state.mode === 'scientific';
 
+  const rootStyle = useMemo(() => ({ backgroundColor: colors.background }), [colors.background]);
+
+  const calcStyle = useMemo(
+    () => ({
+      maxWidth: calculatorMaxWidth,
+      ...(isWide
+        ? {
+            backgroundColor: colors.surface,
+            borderColor: colors.border,
+          }
+        : {}),
+    }),
+    [calculatorMaxWidth, isWide, colors.surface, colors.border],
+  );
+
+  const modeTabStyle = useMemo(
+    () => ({ backgroundColor: colors.surfaceVariant }),
+    [colors.surfaceVariant],
+  );
+
+  const modeTabTextStyle = useMemo(() => ({ color: colors.textSecondary }), [colors.textSecondary]);
+
+  const toggleMode = useCallback(() => dispatch({ type: 'TOGGLE_MODE' }), [dispatch]);
+
   return (
-    <View style={[styles.root, { backgroundColor: colors.background }, isWide && styles.rootWide]}>
+    <View style={[styles.root, rootStyle, isWide && styles.rootWide]}>
       <View
         style={[
           styles.calculator,
-          { maxWidth: calculatorMaxWidth },
+          calcStyle,
           isWide && styles.calculatorCard,
-          isWide && { backgroundColor: colors.surface, borderColor: colors.border },
           isScientific && styles.calculatorScientific,
         ]}
       >
@@ -28,14 +57,13 @@ export function CalculatorLayout() {
           <CalculatorDisplay />
         </View>
 
-        {/* Mode toggle */}
         <View style={styles.modeRow}>
           <TouchableOpacity
-            style={[styles.modeTab, { backgroundColor: colors.surfaceVariant }]}
-            onPress={() => dispatch({ type: 'TOGGLE_MODE' })}
+            style={[styles.modeTab, modeTabStyle]}
+            onPress={toggleMode}
             activeOpacity={0.7}
           >
-            <Text style={[styles.modeTabText, { color: colors.textSecondary }]}>
+            <Text style={[styles.modeTabText, modeTabTextStyle]}>
               {isScientific ? 'Basic' : 'Scientific'}
             </Text>
           </TouchableOpacity>
@@ -43,7 +71,9 @@ export function CalculatorLayout() {
 
         {isScientific ? (
           <View style={styles.scienceContainer}>
-            <ScientificKeypad />
+            <Suspense fallback={null}>
+              <ScientificKeypad />
+            </Suspense>
           </View>
         ) : (
           <Keypad />
@@ -51,7 +81,7 @@ export function CalculatorLayout() {
       </View>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   root: {
@@ -102,3 +132,5 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
+
+export { CalculatorLayout };

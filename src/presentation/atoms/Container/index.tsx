@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import { memo, useMemo, type ReactNode } from 'react';
 import { View, type ViewStyle } from 'react-native';
 import { useResponsive } from '@/core/hooks';
 
@@ -8,24 +8,24 @@ interface ContainerProps {
   maxWidth?: number;
 }
 
-/**
- * Responsive container.
- * - Mobile:  flex:1, ocupa todo el ancho
- * - Tablet+: centrado con maxWidth
- */
-export function Container({ children, style, maxWidth }: ContainerProps) {
+const Container = memo(function Container({ children, style, maxWidth }: ContainerProps) {
   const { contentMaxWidth, isMobile } = useResponsive();
   const limit = maxWidth ?? contentMaxWidth;
 
+  const mobileStyle = useMemo(() => [{ flex: 1 } as const, style], [style]);
+  const desktopStyle = useMemo(
+    () => [
+      { flex: 1, width: '100%' as const, maxWidth: limit, alignSelf: 'center' as const },
+      style,
+    ],
+    [style, limit],
+  );
+
   if (isMobile) {
-    return <View style={[{ flex: 1 }, style]}>{children}</View>;
+    return <View style={mobileStyle}>{children}</View>;
   }
 
-  return (
-    <View
-      style={[{ flex: 1, width: '100%', maxWidth: limit, alignSelf: 'center' as const }, style]}
-    >
-      {children}
-    </View>
-  );
-}
+  return <View style={desktopStyle}>{children}</View>;
+});
+
+export { Container };

@@ -1,4 +1,4 @@
-import { useState, type ComponentProps } from 'react';
+import { useMemo, memo, type ComponentProps } from 'react';
 import { Text, StyleSheet, type TextStyle } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -21,7 +21,7 @@ interface ButtonProps extends ComponentProps<typeof Animated.View> {
   disabled?: boolean;
 }
 
-export function Button({
+const Button = memo(function Button({
   label,
   variant = 'number',
   size = 'normal',
@@ -34,50 +34,63 @@ export function Button({
   const { colors } = useTheme();
   const { isWeb, isDesktop, isTablet } = useResponsive();
   const isWide = isDesktop || isTablet;
-  const [hovered, setHovered] = useState(false);
 
   const scale = useSharedValue(1);
   const elevated = useSharedValue(0);
+  const hoveredSV = useSharedValue(0);
 
-  const bgColor = {
-    number: colors.buttonNumber,
-    operator: colors.buttonOperator,
-    function: colors.buttonFunction,
-    utility: colors.buttonUtility,
-  }[variant];
+  const colorsMemo = useMemo(
+    () => ({
+      bgColor: (
+        {
+          number: colors.buttonNumber,
+          operator: colors.buttonOperator,
+          function: colors.buttonFunction,
+          utility: colors.buttonUtility,
+        } as const
+      )[variant],
+      textColor: (
+        {
+          number: colors.buttonNumberText,
+          operator: colors.buttonOperatorText,
+          function: colors.buttonFunctionText,
+          utility: colors.buttonUtilityText,
+        } as const
+      )[variant],
+      disabledBg: (
+        {
+          number: colors.surfaceVariant,
+          operator: colors.surfaceVariant,
+          function: colors.surfaceVariant,
+          utility: colors.surfaceVariant,
+        } as const
+      )[variant],
+      disabledText: colors.textTertiary,
+      borderColor: variant === 'number' ? colors.buttonNumberBorder : 'transparent',
+    }),
+    [colors, variant],
+  );
 
-  const textColor = {
-    number: colors.buttonNumberText,
-    operator: colors.buttonOperatorText,
-    function: colors.buttonFunctionText,
-    utility: colors.buttonUtilityText,
-  }[variant];
-
-  const disabledBg = {
-    number: colors.surfaceVariant,
-    operator: colors.surfaceVariant,
-    function: colors.surfaceVariant,
-    utility: colors.surfaceVariant,
-  }[variant];
-
-  const disabledText = colors.textTertiary;
-
-  const gesture = Gesture.Tap()
-    .enabled(!disabled)
-    .onBegin(() => {
-      scale.value = withSpring(0.92, { damping: 20, stiffness: 300, mass: 0.5 });
-      elevated.value = withTiming(1, { duration: 60 });
-    })
-    .onFinalize(() => {
-      scale.value = withSpring(1, { damping: 20, stiffness: 300, mass: 0.5 });
-      elevated.value = withTiming(0, { duration: 100 });
-    })
-    .onEnd((_event, success) => {
-      if (success) onPress?.();
-    });
+  const gesture = useMemo(
+    () =>
+      Gesture.Tap()
+        .enabled(!disabled)
+        .onBegin(() => {
+          scale.value = withSpring(0.92, { damping: 20, stiffness: 300, mass: 0.5 });
+          elevated.value = withTiming(1, { duration: 60 });
+        })
+        .onFinalize(() => {
+          scale.value = withSpring(1, { damping: 20, stiffness: 300, mass: 0.5 });
+          elevated.value = withTiming(0, { duration: 100 });
+        })
+        .onEnd((_event, success) => {
+          if (success) onPress?.();
+        }),
+    [disabled, onPress, scale, elevated],
+  );
 
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: disabled ? 1 : scale.value }],
+    transform: [{ scale: disabled ? 1 : scale.value * (hoveredSV.value ? 1.04 : 1) }],
     shadowOpacity: disabled
       ? 0
       : variant === 'operator'
@@ -87,13 +100,25 @@ export function Button({
 
   const webHoverProps = isWeb
     ? {
-        onMouseEnter: () => setHovered(true),
-        onMouseLeave: () => setHovered(false),
+        onMouseEnter: () => {
+          hoveredSV.value = 1;
+        },
+        onMouseLeave: () => {
+          hoveredSV.value = 0;
+        },
       }
     : {};
 
-  const hoverScale = hovered && !disabled ? 1.04 : 1;
   const fontScale = getResponsiveFontScale(isDesktop ? 'desktop' : isTablet ? 'tablet' : 'mobile');
+
+  const dynamicStyle = useMemo(
+    () => ({
+      backgroundColor: disabled ? colorsMemo.disabledBg : colorsMemo.bgColor,
+      borderColor: disabled ? 'transparent' : colorsMemo.borderColor,
+      aspectRatio: isWide ? (size === 'double' ? 3.6 : 1.8) : size === 'double' ? 2.1 : 1,
+    }),
+    [disabled, colorsMemo, isWide, size],
+  );
 
   return (
     <GestureDetector gesture={gesture}>
@@ -101,16 +126,7 @@ export function Button({
         style={[
           styles.base,
           size === 'double' && styles.double,
-          {
-            backgroundColor: disabled ? disabledBg : bgColor,
-            borderColor: disabled
-              ? 'transparent'
-              : variant === 'number'
-                ? colors.buttonNumberBorder
-                : 'transparent',
-            transform: [{ scale: hoverScale }],
-            aspectRatio: isWide ? (size === 'double' ? 3.6 : 1.8) : size === 'double' ? 2.1 : 1,
-          },
+          dynamicStyle,
           variant === 'operator' && !disabled && styles.operatorShadow,
           isDesktop && styles.desktopButton,
           animatedStyle,
@@ -123,7 +139,7 @@ export function Button({
           style={[
             styles.label,
             { fontSize: (typography.button.fontSize as number) * fontScale },
-            { color: disabled ? disabledText : textColor },
+            { color: disabled ? colorsMemo.disabledText : colorsMemo.textColor },
             variant === 'operator' && styles.operatorLabel,
             variant === 'function' && styles.functionLabel,
             size === 'double' && styles.doubleLabel,
@@ -137,7 +153,7 @@ export function Button({
       </Animated.View>
     </GestureDetector>
   );
-}
+});
 
 const styles = StyleSheet.create({
   base: {
@@ -179,3 +195,5 @@ const styles = StyleSheet.create({
     ...typography.button,
   },
 });
+
+export { Button };

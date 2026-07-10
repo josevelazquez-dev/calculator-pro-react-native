@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Button } from '@/presentation/atoms';
 
 type ButtonVariant = 'number' | 'operator' | 'function' | 'utility';
@@ -10,7 +11,7 @@ interface CalculatorButtonProps {
   disabled?: boolean;
 }
 
-export function CalculatorButton({
+const CalculatorButton = memo(function CalculatorButton({
   label,
   variant = 'number',
   size = 'normal',
@@ -20,4 +21,6 @@ export function CalculatorButton({
   return (
     <Button label={label} variant={variant} size={size} onPress={onPress} disabled={disabled} />
   );
-}
+});
+
+export { CalculatorButton };

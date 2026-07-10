@@ -1,4 +1,4 @@
-import { Operator } from '@/domain/entities';
+import { Operator, ScientificFunction } from '@/domain/entities';
 
 export interface EvaluationResult {
   result: number;
@@ -82,16 +82,16 @@ export function evaluateBinaryOperation(
  * @returns EvaluationResult with the value if valid, or an error message
  */
 export function validateCalculationResult(value: number): EvaluationResult {
-  if (!Number.isFinite(value)) {
-    return { result: NaN, error: ERROR_MESSAGES.INVALID_RESULT };
-  }
-
   if (Number.isNaN(value)) {
     return { result: NaN, error: ERROR_MESSAGES.INVALID_RESULT };
   }
 
   if (value > MAX_SAFE_RESULT || value < MIN_SAFE_RESULT) {
     return { result: NaN, error: ERROR_MESSAGES.OVERFLOW };
+  }
+
+  if (!Number.isFinite(value)) {
+    return { result: NaN, error: ERROR_MESSAGES.INVALID_RESULT };
   }
 
   return { result: value, error: null };
@@ -114,7 +114,7 @@ export function evaluateToggleSign(value: number): EvaluationResult {
 /**
  * Evaluates a unary scientific function.
  */
-export function evaluateUnaryFunction(name: string, value: number): EvaluationResult {
+export function evaluateUnaryFunction(name: ScientificFunction, value: number): EvaluationResult {
   const toDeg = (v: number) => (v * 180) / Math.PI;
   const fromDeg = (v: number) => (v * Math.PI) / 180;
 

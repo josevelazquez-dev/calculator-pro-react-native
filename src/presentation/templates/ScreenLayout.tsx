@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import { memo, useMemo, type ReactNode } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/presentation/providers';
@@ -9,26 +9,28 @@ interface ScreenLayoutProps {
   children: ReactNode;
 }
 
-export function ScreenLayout({ children }: ScreenLayoutProps) {
+const ScreenLayout = memo(function ScreenLayout({ children }: ScreenLayoutProps) {
   const { colors } = useTheme();
   const { isMobile, screenPadding } = useResponsive();
   const insets = useSafeAreaInsets();
 
+  const screenStyle = useMemo(
+    () => ({
+      backgroundColor: colors.background,
+      paddingTop: isMobile ? insets.top : screenPadding,
+      paddingBottom: insets.bottom,
+    }),
+    [colors.background, isMobile, insets.top, screenPadding, insets.bottom],
+  );
+
   return (
-    <View
-      style={[
-        styles.screen,
-        {
-          backgroundColor: colors.background,
-          paddingTop: isMobile ? insets.top : screenPadding,
-          paddingBottom: insets.bottom,
-        },
-      ]}
-    >
+    <View style={[styles.screen, screenStyle]}>
       <Container>{children}</Container>
     </View>
   );
-}
+});
+
+export { ScreenLayout };
 
 const styles = StyleSheet.create({
   screen: {

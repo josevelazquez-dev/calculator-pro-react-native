@@ -8,35 +8,67 @@ export const storage = createMMKV({
 
 export class HistoryLocalDataSource {
   getHistory(): CalculationEntry[] {
-    const raw = storage.getString(STORAGE_KEYS.HISTORY);
-    if (!raw) return [];
-    return JSON.parse(raw) as CalculationEntry[];
+    try {
+      const raw = storage.getString(STORAGE_KEYS.HISTORY);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return [];
+      return parsed as CalculationEntry[];
+    } catch {
+      return [];
+    }
   }
 
   saveHistory(entries: CalculationEntry[]): void {
-    const trimmed = entries.slice(0, MAX_HISTORY_ITEMS);
-    storage.set(STORAGE_KEYS.HISTORY, JSON.stringify(trimmed));
+    try {
+      const trimmed = entries.slice(0, MAX_HISTORY_ITEMS);
+      storage.set(STORAGE_KEYS.HISTORY, JSON.stringify(trimmed));
+    } catch {
+      // Silently fail
+    }
   }
 
   clearHistory(): void {
-    storage.remove(STORAGE_KEYS.HISTORY);
+    try {
+      storage.remove(STORAGE_KEYS.HISTORY);
+    } catch {
+      // Silently fail
+    }
   }
 }
 
 export class SettingsLocalDataSource {
   getTheme(): 'light' | 'dark' | 'system' {
-    return (storage.getString(STORAGE_KEYS.THEME) as 'light' | 'dark' | 'system') ?? 'system';
+    try {
+      const raw = storage.getString(STORAGE_KEYS.THEME);
+      if (raw === 'light' || raw === 'dark' || raw === 'system') return raw;
+      return 'system';
+    } catch {
+      return 'system';
+    }
   }
 
   setTheme(theme: 'light' | 'dark' | 'system'): void {
-    storage.set(STORAGE_KEYS.THEME, theme);
+    try {
+      storage.set(STORAGE_KEYS.THEME, theme);
+    } catch {
+      // Silently fail
+    }
   }
 
   getHapticFeedback(): boolean {
-    return storage.getBoolean(STORAGE_KEYS.SETTINGS) ?? true;
+    try {
+      return storage.getBoolean(STORAGE_KEYS.SETTINGS) ?? true;
+    } catch {
+      return true;
+    }
   }
 
   setHapticFeedback(enabled: boolean): void {
-    storage.set(STORAGE_KEYS.SETTINGS, enabled);
+    try {
+      storage.set(STORAGE_KEYS.SETTINGS, enabled);
+    } catch {
+      // Silently fail
+    }
   }
 }

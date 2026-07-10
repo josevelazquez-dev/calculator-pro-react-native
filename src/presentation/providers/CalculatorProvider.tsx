@@ -23,10 +23,11 @@ type CalculatorAction =
   | { type: 'MEMORY_ADD' }
   | { type: 'MEMORY_SUBTRACT' }
   | { type: 'TOGGLE_MODE' }
-  | { type: 'SCIENTIFIC_FUNCTION'; fn: string }
+  | { type: 'SCIENTIFIC_FUNCTION'; fn: import('@/domain/entities').ScientificFunction }
   | { type: 'INPUT_PAREN'; paren: '(' | ')' }
   | { type: 'INPUT_CONSTANT'; constant: 'π' | 'e' }
-  | { type: 'INPUT_RANDOM' };
+  | { type: 'INPUT_RANDOM' }
+  | { type: 'SET_DISPLAY_VALUE'; value: string };
 
 const initialState: CalculatorState = {
   displayValue: '0',
@@ -100,6 +101,8 @@ function calculatorReducer(state: CalculatorState, action: CalculatorAction): Ca
       return handleInputConstant(state, action);
     case 'INPUT_RANDOM':
       return handleInputRandom(state);
+    case 'SET_DISPLAY_VALUE':
+      return { ...state, displayValue: action.value, waitingForOperand: true, error: null };
     default:
       return state;
   }
@@ -274,7 +277,10 @@ function handleMemoryRecall(state: CalculatorState): CalculatorState {
 }
 
 /* ── Scientific function (unary) ────────────────────── */
-function handleScientificFunction(state: CalculatorState, action: { fn: string }): CalculatorState {
+function handleScientificFunction(
+  state: CalculatorState,
+  action: { fn: import('@/domain/entities').ScientificFunction },
+): CalculatorState {
   if (state.error) return state;
 
   const currentValue = parseDisplayValue(state.displayValue);
