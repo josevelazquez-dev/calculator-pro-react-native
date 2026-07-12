@@ -7,7 +7,8 @@ import { useResponsive } from '@/core/hooks';
 const CalculatorDisplay = memo(function CalculatorDisplay() {
   const { state } = useCalculator();
   const { colors } = useTheme();
-  const { isDesktop, isTablet, displayMinHeight, displayMaxHeight, displayFlex } = useResponsive();
+  const { isDesktop, isTablet, isDesktopWeb, displayMinHeight, displayMaxHeight, displayFlex } =
+    useResponsive();
   const isWide = isDesktop || isTablet;
 
   const isError = state.error !== null || state.displayValue === 'Error';
@@ -18,11 +19,11 @@ const CalculatorDisplay = memo(function CalculatorDisplay() {
       minHeight: displayMinHeight,
       maxHeight: displayMaxHeight,
       justifyContent: 'flex-end' as const,
-      paddingHorizontal: isWide ? 24 : 16,
-      paddingTop: 8,
-      paddingBottom: 12,
+      paddingHorizontal: isDesktopWeb ? 20 : isWide ? 24 : 16,
+      paddingTop: isDesktopWeb ? 16 : 8,
+      paddingBottom: isDesktopWeb ? 16 : 12,
     }),
-    [displayFlex, displayMinHeight, displayMaxHeight, isWide],
+    [displayFlex, displayMinHeight, displayMaxHeight, isWide, isDesktopWeb],
   );
 
   const cardStyle = useMemo(
@@ -30,10 +31,14 @@ const CalculatorDisplay = memo(function CalculatorDisplay() {
       backgroundColor: colors.surface,
       borderColor: colors.border,
       borderWidth: 1,
-      borderRadius: 20,
-      paddingVertical: 10,
+      borderRadius: isDesktopWeb ? 24 : 20,
+      paddingVertical: isDesktopWeb ? 14 : 10,
       ...Platform.select({
-        web: { boxShadow: '0px 2px 8px rgba(0,0,0,0.06)' },
+        web: {
+          boxShadow: isDesktopWeb
+            ? '0px 4px 16px rgba(0,0,0,0.08)'
+            : '0px 2px 8px rgba(0,0,0,0.06)',
+        },
         default: {
           shadowOffset: { width: 0, height: 2 } as const,
           shadowOpacity: 0.06,
@@ -42,7 +47,7 @@ const CalculatorDisplay = memo(function CalculatorDisplay() {
       }),
       elevation: 1,
     }),
-    [colors.surface, colors.border],
+    [colors.surface, colors.border, isDesktopWeb],
   );
 
   return (

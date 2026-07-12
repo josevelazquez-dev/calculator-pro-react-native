@@ -2,7 +2,7 @@ import { lazy, Suspense, memo, useMemo, useCallback } from 'react';
 import { View, TouchableOpacity, Text, Platform } from 'react-native';
 import { CalculatorDisplay } from '@/presentation/organisms';
 import { Keypad } from '@/presentation/organisms';
-import { useTheme, useCalculator } from '@/presentation/providers';
+import { useTheme, useCalculator, useLanguage } from '@/presentation/providers';
 import { useResponsive } from '@/core/hooks';
 
 const ScientificKeypad = lazy(() =>
@@ -14,7 +14,9 @@ const ScientificKeypad = lazy(() =>
 const CalculatorLayout = memo(function CalculatorLayout() {
   const { colors } = useTheme();
   const { state, dispatch } = useCalculator();
-  const { isDesktop, isTablet, calculatorMaxWidth, headerFlex, keypadFlex } = useResponsive();
+  const { t } = useLanguage();
+  const { isDesktop, isTablet, isDesktopWeb, calculatorMaxWidth, headerFlex, keypadFlex } =
+    useResponsive();
   const isWide = isDesktop || isTablet;
   const isScientific = state.mode === 'scientific';
 
@@ -33,7 +35,11 @@ const CalculatorLayout = memo(function CalculatorLayout() {
       overflow: 'hidden' as const,
       ...(isWide
         ? Platform.select({
-            web: { boxShadow: '0px 4px 24px rgba(0,0,0,0.12)' },
+            web: {
+              boxShadow: isDesktopWeb
+                ? '0px 8px 32px rgba(0,0,0,0.15)'
+                : '0px 4px 24px rgba(0,0,0,0.12)',
+            },
             default: {
               shadowOffset: { width: 0, height: 4 } as const,
               shadowOpacity: 0.12,
@@ -43,7 +49,7 @@ const CalculatorLayout = memo(function CalculatorLayout() {
         : {}),
       ...(isWide ? { elevation: 8 } : {}),
     }),
-    [isWide, colors.surface, colors.border, calculatorMaxWidth],
+    [isWide, isDesktopWeb, colors.surface, colors.border, calculatorMaxWidth],
   );
 
   const headerStyle = useMemo(
@@ -51,39 +57,48 @@ const CalculatorLayout = memo(function CalculatorLayout() {
       flex: headerFlex,
       flexDirection: 'row' as const,
       alignItems: 'center' as const,
-      justifyContent: 'flex-end' as const,
-      paddingHorizontal: 16,
-      minHeight: 32,
+      justifyContent: isDesktopWeb ? ('space-between' as const) : ('flex-end' as const),
+      paddingHorizontal: isDesktopWeb ? 20 : 16,
+      minHeight: isDesktopWeb ? 40 : 32,
     }),
-    [headerFlex],
+    [headerFlex, isDesktopWeb],
   );
 
   const tabStyle = useMemo(
     () => ({
       backgroundColor: colors.surfaceVariant,
-      paddingHorizontal: 14,
-      paddingVertical: 6,
-      borderRadius: 14,
+      paddingHorizontal: isDesktopWeb ? 18 : 14,
+      paddingVertical: isDesktopWeb ? 8 : 6,
+      borderRadius: isDesktopWeb ? 16 : 14,
     }),
-    [colors.surfaceVariant],
+    [colors.surfaceVariant, isDesktopWeb],
   );
 
   const tabTextStyle = useMemo(
     () => ({
       color: colors.textSecondary,
-      fontSize: 11,
+      fontSize: isDesktopWeb ? 13 : 11,
       fontWeight: '600' as const,
       letterSpacing: 0.5,
       textTransform: 'uppercase' as const,
     }),
-    [colors.textSecondary],
+    [colors.textSecondary, isDesktopWeb],
   );
 
   return (
     <View style={innerStyle}>
       <View style={headerStyle}>
+        {isDesktopWeb ? (
+          <Text
+            style={{ color: colors.textSecondary, fontSize: 12, fontWeight: '500', opacity: 0.6 }}
+          >
+            Calculator Pro
+          </Text>
+        ) : null}
         <TouchableOpacity style={tabStyle} onPress={toggleMode} activeOpacity={0.7}>
-          <Text style={tabTextStyle}>{isScientific ? 'Basic' : 'Scientific'}</Text>
+          <Text style={tabTextStyle}>
+            {isScientific ? t('calculator.basic') : t('calculator.scientific')}
+          </Text>
         </TouchableOpacity>
       </View>
 

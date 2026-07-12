@@ -1,12 +1,13 @@
 import { useMemo } from 'react';
 import { Tabs } from 'expo-router';
 import { Platform } from 'react-native';
-import { useTheme, HistoryProvider } from '@/presentation/providers';
+import { useTheme, HistoryProvider, useLanguage } from '@/presentation/providers';
 import { useResponsive } from '@/core/hooks';
 
 export default function TabLayout() {
   const { colors } = useTheme();
-  const { isDesktop, isTablet, calculatorMaxWidth } = useResponsive();
+  const { t } = useLanguage();
+  const { isDesktop, isTablet, isDesktopWeb, calculatorMaxWidth } = useResponsive();
   const isWide = isDesktop || isTablet;
 
   const screenOptions = useMemo(
@@ -16,9 +17,9 @@ export default function TabLayout() {
         backgroundColor: colors.surface,
         borderTopColor: colors.border,
         borderTopWidth: 1,
-        height: 48,
-        paddingBottom: 4,
-        paddingTop: 4,
+        height: isDesktopWeb ? 40 : 48,
+        paddingBottom: isDesktopWeb ? 2 : 4,
+        paddingTop: isDesktopWeb ? 2 : 4,
         elevation: 8,
         ...(Platform.select({
           web: { boxShadow: '0px -2px 8px rgba(0,0,0,0.06)' },
@@ -36,15 +37,15 @@ export default function TabLayout() {
       tabBarActiveTintColor: colors.primary,
       tabBarInactiveTintColor: colors.textSecondary,
       tabBarLabelStyle: {
-        fontSize: 10,
+        fontSize: isDesktopWeb ? 11 : 10,
         fontWeight: '600' as const,
         letterSpacing: 0.3,
       },
       tabBarIconStyle: {
-        marginBottom: -2,
+        marginBottom: isDesktopWeb ? -1 : -2,
       },
     }),
-    [colors, isWide, calculatorMaxWidth],
+    [colors, isWide, calculatorMaxWidth, isDesktopWeb],
   );
 
   return (
@@ -53,22 +54,22 @@ export default function TabLayout() {
         <Tabs.Screen
           name="index"
           options={{
-            title: 'Calculator',
-            tabBarLabel: 'Calc',
+            title: t('nav.calculator'),
+            tabBarLabel: t('nav.calculator'),
           }}
         />
         <Tabs.Screen
           name="history"
           options={{
-            title: 'History',
-            tabBarLabel: 'History',
+            title: t('nav.history'),
+            tabBarLabel: t('nav.history'),
           }}
         />
         <Tabs.Screen
           name="settings"
           options={{
-            title: 'Settings',
-            tabBarLabel: 'Settings',
+            title: t('nav.settings'),
+            tabBarLabel: t('nav.settings'),
           }}
         />
       </Tabs>

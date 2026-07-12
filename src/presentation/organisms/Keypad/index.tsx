@@ -1,7 +1,8 @@
-import { useCallback, memo } from 'react';
+import { useCallback, memo, useMemo } from 'react';
 import { View } from 'react-native';
 import { CalculatorButton } from '@/presentation/molecules';
 import { useCalculator } from '@/presentation/providers';
+import { useResponsive } from '@/core/hooks';
 import { Operator } from '@/domain/entities';
 
 interface KeypadButton {
@@ -11,10 +12,17 @@ interface KeypadButton {
   onPress: () => void;
 }
 
-const GAP = 4;
+const GAP_MOBILE = 4;
+const GAP_WEB = 8;
 
 const Keypad = memo(function Keypad() {
   const { dispatch } = useCalculator();
+  const { isDesktopWeb } = useResponsive();
+
+  const GAP = isDesktopWeb ? GAP_WEB : GAP_MOBILE;
+
+  const paddingHoriz = isDesktopWeb ? 16 : 12;
+  const paddingBottom = isDesktopWeb ? 16 : 8;
 
   const inputDigit = useCallback(
     (digit: string) => dispatch({ type: 'INPUT_DIGIT', digit }),
@@ -46,41 +54,65 @@ const Keypad = memo(function Keypad() {
   const on3 = useCallback(() => inputDigit('3'), [inputDigit]);
   const on0 = useCallback(() => inputDigit('0'), [inputDigit]);
 
-  const rows: KeypadButton[][] = [
-    [
-      { label: 'C', variant: 'function', onPress: clear },
-      { label: 'CE', variant: 'function', onPress: clearEntry },
-      { label: '%', variant: 'function', onPress: percentage },
-      { label: Operator.Divide, variant: 'operator', onPress: onDivide },
+  const rows: KeypadButton[][] = useMemo(
+    () => [
+      [
+        { label: 'C', variant: 'function', onPress: clear },
+        { label: 'CE', variant: 'function', onPress: clearEntry },
+        { label: '%', variant: 'function', onPress: percentage },
+        { label: Operator.Divide, variant: 'operator', onPress: onDivide },
+      ],
+      [
+        { label: '7', onPress: on7 },
+        { label: '8', onPress: on8 },
+        { label: '9', onPress: on9 },
+        { label: Operator.Multiply, variant: 'operator', onPress: onMultiply },
+      ],
+      [
+        { label: '4', onPress: on4 },
+        { label: '5', onPress: on5 },
+        { label: '6', onPress: on6 },
+        { label: Operator.Subtract, variant: 'operator', onPress: onSubtract },
+      ],
+      [
+        { label: '1', onPress: on1 },
+        { label: '2', onPress: on2 },
+        { label: '3', onPress: on3 },
+        { label: Operator.Add, variant: 'operator', onPress: onAdd },
+      ],
+      [
+        { label: '±', variant: 'utility', onPress: toggleSign },
+        { label: '0', size: 'double', onPress: on0 },
+        { label: '.', onPress: inputDecimal },
+        { label: '=', variant: 'operator', onPress: calculate },
+      ],
     ],
     [
-      { label: '7', onPress: on7 },
-      { label: '8', onPress: on8 },
-      { label: '9', onPress: on9 },
-      { label: Operator.Multiply, variant: 'operator', onPress: onMultiply },
+      clear,
+      clearEntry,
+      percentage,
+      onDivide,
+      on7,
+      on8,
+      on9,
+      onMultiply,
+      on4,
+      on5,
+      on6,
+      onSubtract,
+      on1,
+      on2,
+      on3,
+      onAdd,
+      toggleSign,
+      on0,
+      inputDecimal,
+      calculate,
     ],
-    [
-      { label: '4', onPress: on4 },
-      { label: '5', onPress: on5 },
-      { label: '6', onPress: on6 },
-      { label: Operator.Subtract, variant: 'operator', onPress: onSubtract },
-    ],
-    [
-      { label: '1', onPress: on1 },
-      { label: '2', onPress: on2 },
-      { label: '3', onPress: on3 },
-      { label: Operator.Add, variant: 'operator', onPress: onAdd },
-    ],
-    [
-      { label: '±', variant: 'utility', onPress: toggleSign },
-      { label: '0', size: 'double', onPress: on0 },
-      { label: '.', onPress: inputDecimal },
-      { label: '=', variant: 'operator', onPress: calculate },
-    ],
-  ];
+  );
 
   return (
-    <View style={{ flex: 1, paddingHorizontal: 12, paddingBottom: 8 }}>
+    <View style={{ flex: 1, paddingHorizontal: paddingHoriz, paddingBottom }}>
       {rows.map((row, ri) => (
         <View
           key={ri}

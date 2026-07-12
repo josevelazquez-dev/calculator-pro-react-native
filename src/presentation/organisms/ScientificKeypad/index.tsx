@@ -1,13 +1,20 @@
-import { useCallback, memo } from 'react';
+import { useCallback, memo, useMemo } from 'react';
 import { View } from 'react-native';
 import { CalculatorButton } from '@/presentation/molecules';
 import { useCalculator } from '@/presentation/providers';
+import { useResponsive } from '@/core/hooks';
 import { Operator, ScientificFunction } from '@/domain/entities';
 
-const GAP = 2;
+const GAP_MOBILE = 2;
+const GAP_WEB = 4;
 
 const ScientificKeypad = memo(function ScientificKeypad() {
   const { dispatch } = useCalculator();
+  const { isDesktopWeb } = useResponsive();
+
+  const GAP = isDesktopWeb ? GAP_WEB : GAP_MOBILE;
+  const paddingHoriz = isDesktopWeb ? 14 : 10;
+  const paddingBottom = isDesktopWeb ? 12 : 4;
 
   const fn = useCallback(
     (name: ScientificFunction) => dispatch({ type: 'SCIENTIFIC_FUNCTION', fn: name }),
@@ -80,82 +87,133 @@ const ScientificKeypad = memo(function ScientificKeypad() {
     variant?: 'number' | 'operator' | 'function' | 'utility';
     size?: 'normal' | 'double';
     onPress: () => void;
-  }[][] = [
-    [
-      { label: 'sin', variant: 'function', onPress: onSin },
-      { label: 'cos', variant: 'function', onPress: onCos },
-      { label: 'tan', variant: 'function', onPress: onTan },
-      { label: 'Rand', variant: 'utility', onPress: random },
+  }[][] = useMemo(
+    () => [
+      [
+        { label: 'sin', variant: 'function', onPress: onSin },
+        { label: 'cos', variant: 'function', onPress: onCos },
+        { label: 'tan', variant: 'function', onPress: onTan },
+        { label: 'Rand', variant: 'utility', onPress: random },
+      ],
+      [
+        { label: 'asin', variant: 'function', onPress: onAsin },
+        { label: 'acos', variant: 'function', onPress: onAcos },
+        { label: 'atan', variant: 'function', onPress: onAtan },
+        { label: 'exp', variant: 'utility', onPress: onExp },
+      ],
+      [
+        { label: 'x²', variant: 'function', onPress: onX2 },
+        { label: 'x³', variant: 'function', onPress: onX3 },
+        { label: 'xʸ', variant: 'operator', onPress: onPower },
+        { label: '√', variant: 'function', onPress: onSqrt },
+      ],
+      [
+        { label: '10ˣ', variant: 'function', onPress: on10x },
+        { label: 'eˣ', variant: 'function', onPress: onEx },
+        { label: 'ln', variant: 'function', onPress: onLn },
+        { label: 'log', variant: 'function', onPress: onLog },
+      ],
+      [
+        { label: 'π', variant: 'utility', onPress: onPi },
+        { label: 'e', variant: 'utility', onPress: onE },
+        { label: 'n!', variant: 'function', onPress: onFact },
+        { label: 'mod', variant: 'operator', onPress: onMod },
+      ],
+      [
+        { label: '(', variant: 'utility', onPress: onLParen },
+        { label: ')', variant: 'utility', onPress: onRParen },
+        { label: '|x|', variant: 'function', onPress: onAbs },
+        { label: 'MC', variant: 'utility', onPress: onMC },
+      ],
+      [
+        { label: 'MR', variant: 'utility', onPress: onMR },
+        { label: 'M+', variant: 'utility', onPress: onMPlus },
+        { label: 'M-', variant: 'utility', onPress: onMMinus },
+        { label: '÷', variant: 'operator', onPress: onDivide },
+      ],
+      [
+        { label: '7', onPress: on7 },
+        { label: '8', onPress: on8 },
+        { label: '9', onPress: on9 },
+        { label: '×', variant: 'operator', onPress: onMultiply },
+      ],
+      [
+        { label: '4', onPress: on4 },
+        { label: '5', onPress: on5 },
+        { label: '6', onPress: on6 },
+        { label: '-', variant: 'operator', onPress: onSubtract },
+      ],
+      [
+        { label: '1', onPress: on1 },
+        { label: '2', onPress: on2 },
+        { label: '3', onPress: on3 },
+        { label: '+', variant: 'operator', onPress: onAdd },
+      ],
+      [
+        { label: 'C', variant: 'function', onPress: onClear },
+        { label: 'CE', variant: 'function', onPress: onClearEntry },
+        { label: '%', variant: 'function', onPress: onPercent },
+        { label: '=', variant: 'operator', onPress: onCalc },
+      ],
+      [
+        { label: '±', variant: 'utility', onPress: onToggleSign },
+        { label: '0', size: 'double', onPress: on0 },
+        { label: '.', onPress: onDecimal },
+      ],
     ],
     [
-      { label: 'asin', variant: 'function', onPress: onAsin },
-      { label: 'acos', variant: 'function', onPress: onAcos },
-      { label: 'atan', variant: 'function', onPress: onAtan },
-      { label: 'exp', variant: 'utility', onPress: onExp },
+      onSin,
+      onCos,
+      onTan,
+      random,
+      onAsin,
+      onAcos,
+      onAtan,
+      onExp,
+      onX2,
+      onX3,
+      onPower,
+      onSqrt,
+      on10x,
+      onEx,
+      onLn,
+      onLog,
+      onPi,
+      onE,
+      onFact,
+      onMod,
+      onLParen,
+      onRParen,
+      onAbs,
+      onMC,
+      onMR,
+      onMPlus,
+      onMMinus,
+      onDivide,
+      on7,
+      on8,
+      on9,
+      onMultiply,
+      on4,
+      on5,
+      on6,
+      onSubtract,
+      on1,
+      on2,
+      on3,
+      onAdd,
+      onClear,
+      onClearEntry,
+      onPercent,
+      onCalc,
+      onToggleSign,
+      on0,
+      onDecimal,
     ],
-    [
-      { label: 'x²', variant: 'function', onPress: onX2 },
-      { label: 'x³', variant: 'function', onPress: onX3 },
-      { label: 'xʸ', variant: 'operator', onPress: onPower },
-      { label: '√', variant: 'function', onPress: onSqrt },
-    ],
-    [
-      { label: '10ˣ', variant: 'function', onPress: on10x },
-      { label: 'eˣ', variant: 'function', onPress: onEx },
-      { label: 'ln', variant: 'function', onPress: onLn },
-      { label: 'log', variant: 'function', onPress: onLog },
-    ],
-    [
-      { label: 'π', variant: 'utility', onPress: onPi },
-      { label: 'e', variant: 'utility', onPress: onE },
-      { label: 'n!', variant: 'function', onPress: onFact },
-      { label: 'mod', variant: 'operator', onPress: onMod },
-    ],
-    [
-      { label: '(', variant: 'utility', onPress: onLParen },
-      { label: ')', variant: 'utility', onPress: onRParen },
-      { label: '|x|', variant: 'function', onPress: onAbs },
-      { label: 'MC', variant: 'utility', onPress: onMC },
-    ],
-    [
-      { label: 'MR', variant: 'utility', onPress: onMR },
-      { label: 'M+', variant: 'utility', onPress: onMPlus },
-      { label: 'M-', variant: 'utility', onPress: onMMinus },
-      { label: '÷', variant: 'operator', onPress: onDivide },
-    ],
-    [
-      { label: '7', onPress: on7 },
-      { label: '8', onPress: on8 },
-      { label: '9', onPress: on9 },
-      { label: '×', variant: 'operator', onPress: onMultiply },
-    ],
-    [
-      { label: '4', onPress: on4 },
-      { label: '5', onPress: on5 },
-      { label: '6', onPress: on6 },
-      { label: '-', variant: 'operator', onPress: onSubtract },
-    ],
-    [
-      { label: '1', onPress: on1 },
-      { label: '2', onPress: on2 },
-      { label: '3', onPress: on3 },
-      { label: '+', variant: 'operator', onPress: onAdd },
-    ],
-    [
-      { label: 'C', variant: 'function', onPress: onClear },
-      { label: 'CE', variant: 'function', onPress: onClearEntry },
-      { label: '%', variant: 'function', onPress: onPercent },
-      { label: '=', variant: 'operator', onPress: onCalc },
-    ],
-    [
-      { label: '±', variant: 'utility', onPress: onToggleSign },
-      { label: '0', size: 'double', onPress: on0 },
-      { label: '.', onPress: onDecimal },
-    ],
-  ];
+  );
 
   return (
-    <View style={{ flex: 1, paddingHorizontal: 10, paddingBottom: 4 }}>
+    <View style={{ flex: 1, paddingHorizontal: paddingHoriz, paddingBottom }}>
       {rows.map((row, ri) => (
         <View
           key={ri}

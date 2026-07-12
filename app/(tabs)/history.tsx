@@ -4,7 +4,7 @@ import * as Clipboard from 'expo-clipboard';
 import { useFocusEffect, router } from 'expo-router';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { ScreenLayout } from '@/presentation/templates';
-import { useTheme, useHistory } from '@/presentation/providers';
+import { useTheme, useHistory, useLanguage } from '@/presentation/providers';
 import { useResponsive } from '@/core/hooks';
 import { spacing, borderRadius } from '@/core/theme';
 import type { CalculationEntry } from '@/domain/entities';
@@ -13,6 +13,7 @@ const keyExtractor = (item: CalculationEntry) => item.id;
 
 export default function HistoryScreen() {
   const { colors } = useTheme();
+  const { t } = useLanguage();
   const { entries, removeEntry, clearHistory, refresh, loadResult } = useHistory();
   const { isDesktop, isTablet } = useResponsive();
   const isWide = isDesktop || isTablet;
@@ -43,12 +44,12 @@ export default function HistoryScreen() {
     if (Platform.OS === 'web') {
       clearHistory();
     } else {
-      Alert.alert('Clear History', 'Delete all calculations?', [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Clear', style: 'destructive', onPress: clearHistory },
+      Alert.alert(t('history.clearTitle'), t('history.clearMessage'), [
+        { text: t('history.cancel'), style: 'cancel' },
+        { text: t('history.confirm'), style: 'destructive', onPress: clearHistory },
       ]);
     }
-  }, [clearHistory]);
+  }, [clearHistory, t]);
 
   const handleDelete = useCallback(
     (id: string) => {
@@ -82,19 +83,19 @@ export default function HistoryScreen() {
                 style={[styles.actionBtn, { backgroundColor: colors.surfaceVariant }]}
                 onPress={() => handleReuse(item.result)}
               >
-                <Text style={[styles.actionText, { color: colors.primary }]}>Use</Text>
+                <Text style={[styles.actionText, { color: colors.primary }]}>{t('history.use')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.actionBtn, { backgroundColor: colors.surfaceVariant }]}
                 onPress={() => handleCopy(item.result)}
               >
-                <Text style={[styles.actionText, { color: colors.primary }]}>Copy</Text>
+                <Text style={[styles.actionText, { color: colors.primary }]}>{t('history.copy')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.actionBtn, { backgroundColor: colors.surfaceVariant }]}
                 onPress={() => handleDelete(item.id)}
               >
-                <Text style={[styles.actionText, { color: colors.error }]}>Del</Text>
+                <Text style={[styles.actionText, { color: colors.error }]}>{t('history.delete')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -105,14 +106,14 @@ export default function HistoryScreen() {
         </View>
       </Animated.View>
     ),
-    [colors, formatDate, handleReuse, handleCopy, handleDelete],
+    [colors, formatDate, handleReuse, handleCopy, handleDelete, t],
   );
 
   if (entries.length === 0) {
     return (
       <ScreenLayout>
         <View style={styles.container}>
-          <Text style={[styles.title, { color: colors.text }]}>History</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{t('history.title')}</Text>
           <View
             style={[
               styles.emptyState,
@@ -122,10 +123,10 @@ export default function HistoryScreen() {
             <Animated.View entering={FadeIn.duration(400).springify()}>
               <Text style={styles.emptyIcon}>📋</Text>
               <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-                No calculations yet
+                {t('history.empty')}
               </Text>
               <Text style={[styles.emptySubtext, { color: colors.textTertiary }]}>
-                Your calculation history will appear here
+                {t('history.emptySub')}
               </Text>
             </Animated.View>
           </View>
@@ -138,12 +139,12 @@ export default function HistoryScreen() {
     <ScreenLayout>
       <View style={styles.container}>
         <View style={styles.headerRow}>
-          <Text style={[styles.title, { color: colors.text }]}>History</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{t('history.title')}</Text>
           <TouchableOpacity
             style={[styles.clearBtn, { backgroundColor: colors.surfaceVariant }]}
             onPress={handleClearAll}
           >
-            <Text style={[styles.clearBtnText, { color: colors.error }]}>Clear All</Text>
+            <Text style={[styles.clearBtnText, { color: colors.error }]}>{t('history.clearAll')}</Text>
           </TouchableOpacity>
         </View>
         <FlatList

@@ -12,7 +12,7 @@ interface DisplayRowProps {
 
 const DisplayRow = memo(function DisplayRow({ expression, value, isError }: DisplayRowProps) {
   const { colors } = useTheme();
-  const { width } = useResponsive();
+  const { width, isDesktopWeb } = useResponsive();
 
   const displayScale = useSharedValue(1);
 
@@ -21,12 +21,18 @@ const DisplayRow = memo(function DisplayRow({ expression, value, isError }: Disp
   }));
 
   const { valueFontSize, exprFontSize } = useMemo(() => {
+    if (isDesktopWeb) {
+      return {
+        valueFontSize: isError ? 48 : 80,
+        exprFontSize: 24,
+      };
+    }
     const base = width < 400 ? 44 : width < 500 ? 52 : 64;
     return {
       valueFontSize: isError ? 36 : base,
       exprFontSize: width < 400 ? 16 : width < 500 ? 18 : 20,
     };
-  }, [width, isError]);
+  }, [width, isError, isDesktopWeb]);
 
   return (
     <View style={styles.container}>

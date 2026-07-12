@@ -15,9 +15,9 @@ const themeOptions: { value: ThemePreference; labelKey: string }[] = [
   { value: 'auto', labelKey: 'settings.auto' },
 ];
 
-const languageOptions: { value: Language; label: string }[] = [
-  { value: 'es', label: 'Español' },
-  { value: 'en', label: 'English' },
+const languageOptions: { value: Language; labelKey: string }[] = [
+  { value: 'es', labelKey: 'settings.spanish' },
+  { value: 'en', labelKey: 'settings.english' },
 ];
 
 const GITHUB_URL = 'https://github.com/josevelazquez-dev';
@@ -135,7 +135,7 @@ export default function SettingsScreen() {
                     isActive ? { color: '#FFFFFF', fontWeight: '700' } : { color: colors.text },
                   ]}
                 >
-                  {option.label}
+                  {t(option.labelKey)}
                 </Text>
               </Pressable>
             );
