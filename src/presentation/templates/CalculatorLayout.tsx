@@ -1,10 +1,9 @@
 import { lazy, Suspense, memo, useMemo, useCallback } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, Platform } from 'react-native';
+import { View, TouchableOpacity, Text, Platform } from 'react-native';
 import { CalculatorDisplay } from '@/presentation/organisms';
 import { Keypad } from '@/presentation/organisms';
 import { useTheme, useCalculator } from '@/presentation/providers';
 import { useResponsive } from '@/core/hooks';
-import { borderRadius, spacing } from '@/core/theme';
 
 const ScientificKeypad = lazy(() =>
   import('@/presentation/organisms/ScientificKeypad').then((m) => ({
@@ -15,123 +14,92 @@ const ScientificKeypad = lazy(() =>
 const CalculatorLayout = memo(function CalculatorLayout() {
   const { colors } = useTheme();
   const { state, dispatch } = useCalculator();
-  const { isDesktop, isTablet, calculatorMaxWidth } = useResponsive();
+  const { isDesktop, isTablet, calculatorMaxWidth, headerFlex, keypadFlex } = useResponsive();
   const isWide = isDesktop || isTablet;
   const isScientific = state.mode === 'scientific';
 
-  const rootStyle = useMemo(() => ({ backgroundColor: colors.background }), [colors.background]);
+  const toggleMode = useCallback(() => dispatch({ type: 'TOGGLE_MODE' }), [dispatch]);
 
-  const calcStyle = useMemo(
+  const innerStyle = useMemo(
     () => ({
+      flex: 1,
       maxWidth: calculatorMaxWidth,
+      alignSelf: 'center' as const,
+      width: '100%' as const,
+      backgroundColor: isWide ? colors.surface : undefined,
+      borderColor: isWide ? colors.border : undefined,
+      borderWidth: isWide ? 1 : 0,
+      borderRadius: isWide ? 24 : 0,
+      overflow: 'hidden' as const,
       ...(isWide
-        ? {
-            backgroundColor: colors.surface,
-            borderColor: colors.border,
-          }
+        ? Platform.select({
+            web: { boxShadow: '0px 4px 24px rgba(0,0,0,0.12)' },
+            default: {
+              shadowOffset: { width: 0, height: 4 } as const,
+              shadowOpacity: 0.12,
+              shadowRadius: 24,
+            },
+          })
         : {}),
+      ...(isWide ? { elevation: 8 } : {}),
     }),
-    [calculatorMaxWidth, isWide, colors.surface, colors.border],
+    [isWide, colors.surface, colors.border, calculatorMaxWidth],
   );
 
-  const modeTabStyle = useMemo(
-    () => ({ backgroundColor: colors.surfaceVariant }),
+  const headerStyle = useMemo(
+    () => ({
+      flex: headerFlex,
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      justifyContent: 'flex-end' as const,
+      paddingHorizontal: 16,
+      minHeight: 32,
+    }),
+    [headerFlex],
+  );
+
+  const tabStyle = useMemo(
+    () => ({
+      backgroundColor: colors.surfaceVariant,
+      paddingHorizontal: 14,
+      paddingVertical: 6,
+      borderRadius: 14,
+    }),
     [colors.surfaceVariant],
   );
 
-  const modeTabTextStyle = useMemo(() => ({ color: colors.textSecondary }), [colors.textSecondary]);
-
-  const toggleMode = useCallback(() => dispatch({ type: 'TOGGLE_MODE' }), [dispatch]);
+  const tabTextStyle = useMemo(
+    () => ({
+      color: colors.textSecondary,
+      fontSize: 11,
+      fontWeight: '600' as const,
+      letterSpacing: 0.5,
+      textTransform: 'uppercase' as const,
+    }),
+    [colors.textSecondary],
+  );
 
   return (
-    <View style={[styles.root, rootStyle, isWide && styles.rootWide]}>
-      <View
-        style={[
-          styles.calculator,
-          calcStyle,
-          isWide && styles.calculatorCard,
-          isScientific && styles.calculatorScientific,
-        ]}
-      >
-        <View style={styles.displayArea}>
-          <CalculatorDisplay />
-        </View>
+    <View style={innerStyle}>
+      <View style={headerStyle}>
+        <TouchableOpacity style={tabStyle} onPress={toggleMode} activeOpacity={0.7}>
+          <Text style={tabTextStyle}>{isScientific ? 'Basic' : 'Scientific'}</Text>
+        </TouchableOpacity>
+      </View>
 
-        <View style={styles.modeRow}>
-          <TouchableOpacity
-            style={[styles.modeTab, modeTabStyle]}
-            onPress={toggleMode}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.modeTabText, modeTabTextStyle]}>
-              {isScientific ? 'Basic' : 'Scientific'}
-            </Text>
-          </TouchableOpacity>
-        </View>
+      <CalculatorDisplay />
 
+      <View style={{ flex: keypadFlex }}>
         {isScientific ? (
-          <View style={styles.scienceContainer}>
-            <Suspense fallback={null}>
-              <ScientificKeypad />
-            </Suspense>
-          </View>
+          <Suspense fallback={null}>
+            <ScientificKeypad />
+          </Suspense>
         ) : (
           <Keypad />
         )}
       </View>
     </View>
   );
-});
-
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
-  rootWide: {
-    paddingBottom: 8,
-  },
-  calculator: {
-    width: '100%',
-    alignSelf: 'center',
-  },
-  calculatorScientific: {
-    flex: 1,
-  },
-  calculatorCard: {
-    borderRadius: borderRadius.xxl,
-    borderWidth: 1,
-    overflow: 'hidden',
-    ...Platform.select({
-      web: { boxShadow: '0px 4px 16px rgba(0,0,0,0.1)' },
-      default: { shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 16 },
-    }),
-    elevation: 4,
-  },
-  displayArea: {
-    flex: 0,
-    justifyContent: 'flex-end',
-    minHeight: 80,
-  },
-  modeRow: {
-    flexDirection: 'row',
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.sm,
-  },
-  modeTab: {
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.xs + 2,
-    borderRadius: borderRadius.lg,
-  },
-  modeTabText: {
-    fontSize: 12,
-    fontWeight: '600',
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
-  },
-  scienceContainer: {
-    flex: 1,
-  },
 });
 
 export { CalculatorLayout };

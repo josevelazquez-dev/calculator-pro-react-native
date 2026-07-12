@@ -9,7 +9,7 @@ import Animated, {
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { useTheme } from '@/presentation/providers';
 import { useResponsive } from '@/core/hooks';
-import { typography, spacing, borderRadius } from '@/core/theme';
+import { typography, borderRadius } from '@/core/theme';
 import { getResponsiveFontScale } from '@/core/theme/responsive';
 
 interface ButtonProps extends ComponentProps<typeof Animated.View> {
@@ -33,7 +33,6 @@ const Button = memo(function Button({
 }: ButtonProps) {
   const { colors } = useTheme();
   const { isWeb, isDesktop, isTablet } = useResponsive();
-  const isWide = isDesktop || isTablet;
 
   const scale = useSharedValue(1);
   const elevated = useSharedValue(0);
@@ -115,13 +114,17 @@ const Button = memo(function Button({
 
   const fontScale = getResponsiveFontScale(isDesktop ? 'desktop' : isTablet ? 'tablet' : 'mobile');
 
+  const doubleStyle = useMemo(
+    () => (size === 'double' ? { alignItems: 'flex-start' as const, paddingLeft: 20 } : null),
+    [size],
+  );
+
   const dynamicStyle = useMemo(
     () => ({
       backgroundColor: disabled ? colorsMemo.disabledBg : colorsMemo.bgColor,
       borderColor: disabled ? 'transparent' : colorsMemo.borderColor,
-      aspectRatio: isWide ? (size === 'double' ? 3.6 : 1.8) : size === 'double' ? 2.1 : 1,
     }),
-    [disabled, colorsMemo, isWide, size],
+    [disabled, colorsMemo],
   );
 
   return (
@@ -129,8 +132,8 @@ const Button = memo(function Button({
       <Animated.View
         style={[
           styles.base,
-          size === 'double' && styles.double,
           dynamicStyle,
+          doubleStyle,
           variant === 'operator' && !disabled && styles.operatorShadow,
           isDesktop && styles.desktopButton,
           animatedStyle,
@@ -162,11 +165,9 @@ const Button = memo(function Button({
 const styles = StyleSheet.create({
   base: {
     flex: 1,
-    aspectRatio: 1,
     borderRadius: borderRadius.xxl,
     alignItems: 'center',
     justifyContent: 'center',
-    margin: spacing.xs,
     ...Platform.select({
       web: { boxShadow: '0px 2px 6px rgba(0,0,0,0.1)' },
       default: { shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 6 },
@@ -180,11 +181,6 @@ const styles = StyleSheet.create({
       default: { shadowOffset: { width: 0, height: 4 }, shadowRadius: 12 },
     }),
     elevation: 6,
-  },
-  double: {
-    aspectRatio: 2.1,
-    alignItems: 'flex-start',
-    paddingLeft: spacing.xxxl,
   },
   desktopButton: {
     cursor: 'pointer',

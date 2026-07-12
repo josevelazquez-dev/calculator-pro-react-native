@@ -9,8 +9,8 @@ interface ContainerProps {
 }
 
 const Container = memo(function Container({ children, style, maxWidth }: ContainerProps) {
-  const { contentMaxWidth, isMobile } = useResponsive();
-  const limit = maxWidth ?? contentMaxWidth;
+  const { calculatorMaxWidth, isMobile } = useResponsive();
+  const limit = maxWidth ?? calculatorMaxWidth;
 
   const mobileStyle = useMemo(() => [{ flex: 1 } as const, style], [style]);
   const desktopStyle = useMemo(

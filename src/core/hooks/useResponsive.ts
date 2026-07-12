@@ -20,14 +20,20 @@ export function useResponsive() {
     const isTablet = breakpoint === 'tablet';
     const isDesktop = breakpoint === 'desktop';
     const isWeb = Platform.OS === 'web';
+    const isLandscape = width > height;
 
-    const contentMaxWidth = isDesktop ? 950 : isTablet ? 750 : width;
-    const screenPadding = isDesktop ? 48 : isTablet ? 32 : 16;
-    const maxWidthByHeight = Math.max(320, Math.round((height - 370) * 1.4));
+    const displayMinHeight = 120;
+    const displayMaxHeight = 220;
+
+    const displayFlex = 2;
+    const keypadFlex = 5.5;
+    const headerFlex = 1.2;
+    const totalFlex = displayFlex + keypadFlex + headerFlex;
+
     const calculatorMaxWidth = isDesktop
-      ? Math.min(650, maxWidthByHeight)
+      ? Math.min(Math.round(width * 0.45), 500)
       : isTablet
-        ? Math.min(500, maxWidthByHeight)
+        ? Math.min(Math.round(width * 0.6), 500)
         : width;
 
     return {
@@ -38,8 +44,13 @@ export function useResponsive() {
       isTablet,
       isDesktop,
       isWeb,
-      contentMaxWidth,
-      screenPadding,
+      isLandscape,
+      displayMinHeight,
+      displayMaxHeight,
+      displayFlex,
+      keypadFlex,
+      headerFlex,
+      totalFlex,
       calculatorMaxWidth,
     };
   }, [width, height]);

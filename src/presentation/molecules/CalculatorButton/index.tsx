@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { Button } from '@/presentation/atoms';
 
 type ButtonVariant = 'number' | 'operator' | 'function' | 'utility';
@@ -18,8 +18,17 @@ const CalculatorButton = memo(function CalculatorButton({
   onPress,
   disabled,
 }: CalculatorButtonProps) {
+  const buttonStyle = useMemo(() => ({ flex: size === 'double' ? 2 : 1 }), [size]);
+
   return (
-    <Button label={label} variant={variant} size={size} onPress={onPress} disabled={disabled} />
+    <Button
+      label={label}
+      variant={variant}
+      size={size}
+      onPress={onPress}
+      disabled={disabled}
+      style={buttonStyle}
+    />
   );
 });
 
